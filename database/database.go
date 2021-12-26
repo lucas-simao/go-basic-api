@@ -13,10 +13,23 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func Connection() (db *sqlx.DB) {
+var connectionDB *sqlx.DB
+
+func Connect() *sqlx.DB {
+
+	var (
+		db  *sqlx.DB
+		err error
+	)
+
+	if connectionDB != nil {
+		db = connectionDB
+		return db
+	}
+
 	databaseConfig := readEnvs()
 
-	db, err := sqlx.Connect(databaseConfig.Type, fmt.Sprintf("user=%s port=%s password=%s host=%s dbname=%s sslmode=%s",
+	db, err = sqlx.Connect(databaseConfig.Type, fmt.Sprintf("user=%s port=%s password=%s host=%s dbname=%s sslmode=%s",
 		databaseConfig.Username,
 		databaseConfig.Port,
 		databaseConfig.Password,
@@ -29,11 +42,13 @@ func Connection() (db *sqlx.DB) {
 		panic(err)
 	}
 
+	connectionDB = db
+
 	return db
 }
 
 func readEnvs() (databaseConfig DatabaseConfig) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -46,8 +61,6 @@ func readEnvs() (databaseConfig DatabaseConfig) {
 	for i := 0; i < t.NumField(); i++ {
 		mapDatabase[t.Field(i).Name] = os.Getenv(strings.ToUpper(t.Field(i).Name))
 	}
-
-	fmt.Println(mapDatabase)
 
 	err = mapstructure.Decode(mapDatabase, &databaseConfig)
 

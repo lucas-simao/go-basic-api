@@ -3,13 +3,10 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/lucas-simao/go-basic-api/api/database"
-	"github.com/lucas-simao/go-basic-api/api/user"
+	"github.com/lucas-simao/go-basic-api/user"
 )
 
 func main() {
-	database.Connection()
-
 	e := echo.New()
 
 	e.Use(middleware.Logger())
